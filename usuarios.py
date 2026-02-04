@@ -9,17 +9,36 @@ from persistencia import carregar_usuarios, salvar_usuarios
 # =========================
 
 def login():
+    # garante que a lista de usuários exista
     if not hasattr(dados, "usuarios"):
         carregar_usuarios()
 
+    # 🔥 CASO NÃO EXISTA NENHUM USUÁRIO
     if not dados.usuarios:
-        print("⚠️ Nenhum usuário cadastrado.")
-        print("Crie um usuário ADMIN no arquivo usuarios.json.\n")
+        admin_padrao = {
+            "usuario": "admin",
+            "senha": "admin",
+            "role": con.ROLE_ADMIN,
+            "ativo": True
+        }
+
+        dados.usuarios.append(admin_padrao)
+        dados.usuario_logado = admin_padrao
+        salvar_usuarios()
+
+        limpa_tela()
+        print("⚠️ Nenhum usuário encontrado.")
+        print("✔ Usuário ADMIN padrão criado automaticamente.")
+        print("✔ Login automático realizado como ADMIN.")
+        print("\nUsuário: admin")
+        print("Senha: admin\n")
+        input("Pressione ENTER para continuar...")
         return
 
+    # LOGIN NORMAL
     while True:
         limpa_tela()
-        print("=== LOGIN ===")
+        print("=== LOGIN ===\n")
 
         usuario_input = input("Usuário: ").strip()
         senha_input = input("Senha: ").strip()
@@ -31,7 +50,9 @@ def login():
                 and u.get("ativo", True)
             ):
                 dados.usuario_logado = u
-                print(f"\nBem-vindo, {u['usuario']} ({u['role']})\n")
+
+                limpa_tela()
+                print(f"Bem-vindo, {u['usuario']} ({u['role']})\n")
 
                 # alerta de estoque SOMENTE no login
                 if verificar_alerta_estoque():
@@ -39,7 +60,7 @@ def login():
 
                 return
 
-        print("\nUsuário ou senha inválidos.")
+        print("\n❌ Usuário ou senha inválidos.")
         input("Pressione ENTER para tentar novamente...")
 
 
@@ -53,7 +74,8 @@ def logout():
     if op == "S":
         dados.usuario_logado = None
         print("Logout realizado.")
-        login()  # sem pausa para evitar duplicação
+        input("Pressione ENTER para continuar...")
+        login()
     else:
         print("Logout cancelado.")
 
@@ -72,22 +94,22 @@ def menu_usuarios():
 
     while True:
         limpa_tela()
-        print("=== GERENCIAMENTO DE USUÁRIOS ===")
+        print("=== GERENCIAMENTO DE USUÁRIOS ===\n")
         print("1 - Listar usuários")
         print("2 - Criar usuário")
         print("3 - Ativar / Inativar usuário")
         print("4 - Editar usuário")
         print("0 - Voltar")
 
-        op = input("Escolha: ").strip()
+        op = input("\nEscolha: ").strip()
 
         if op == "0":
             return
 
         acao = acoes.get(op)
         if not acao:
-            print("Opção inválida.")
-            input("\nPressione ENTER para continuar...")
+            print("\n❌ Opção inválida.")
+            input("Pressione ENTER para continuar...")
             continue
 
         limpa_tela()
@@ -170,37 +192,31 @@ def editar_usuario():
     for u in dados.usuarios:
         if u["usuario"].lower() == usuario_nome.lower():
 
-            opcoes = [
-                ("1", "Alterar nome de usuário", lambda: _editar_nome_usuario(u)),
-                ("2", "Alterar senha", lambda: _editar_senha_usuario(u)),
-                ("3", "Alterar role", lambda: _editar_role_usuario(u)),
-            ]
-
             while True:
                 limpa_tela()
-                print(f"=== EDITAR USUÁRIO: {u['usuario']} ===")
-
-                for k, label, _ in opcoes:
-                    print(f"{k} - {label}")
-
+                print(f"=== EDITAR USUÁRIO: {u['usuario']} ===\n")
+                print("1 - Alterar nome de usuário")
+                print("2 - Alterar senha")
+                print("3 - Alterar role")
                 print("0 - Voltar")
 
-                escolha = input("Escolha: ").strip()
+                escolha = input("\nEscolha: ").strip()
 
                 if escolha == "0":
                     salvar_usuarios()
                     print("\n✔ Alterações salvas com sucesso.")
                     return
 
-                opcao = next((o for o in opcoes if o[0] == escolha), None)
-
-                if not opcao:
+                if escolha == "1":
+                    _editar_nome_usuario(u)
+                elif escolha == "2":
+                    _editar_senha_usuario(u)
+                elif escolha == "3":
+                    _editar_role_usuario(u)
+                else:
                     print("\n❌ Opção inválida.")
                     input("Pressione ENTER para continuar...")
-                    continue
-
-                limpa_tela()
-                opcao[2]()
+            return
 
     print("\n❌ Usuário não encontrado.")
     input("Pressione ENTER para continuar...")

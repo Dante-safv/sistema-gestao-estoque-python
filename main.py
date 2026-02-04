@@ -115,6 +115,13 @@ def menu():
     while True:
         limpa_tela()
 
+        # 🔒 segurança extra
+        if not ds.usuario_logado:
+            print("⚠️ Nenhum usuário logado.")
+            input("Pressione ENTER para fazer login...")
+            us.login()
+            continue
+
         print("===== MENU PRINCIPAL =====")
         print(
             f"Usuário logado: "
@@ -139,7 +146,7 @@ def menu():
         acao = ACOES.get(opcao)
 
         if not acao:
-            print("Opção inválida.")
+            print("❌ Opção inválida.")
             input("\nPressione ENTER para continuar...")
             continue
 
