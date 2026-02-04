@@ -70,7 +70,7 @@ O projeto utiliza arquivos locais (**JSON e CSV**) para persistência de dados e
 git clone https://github.com/Dante-safv/sistema-gestao-estoque-python.git
 cd sistema-gestao-estoque-python
 python main.py
-
+```
 ## Execução
 
 O sistema pode ser executado diretamente após a clonagem, **sem necessidade de dependências externas**.
